@@ -4,7 +4,7 @@ Donate link:
 Tags: search, better search, custom search, relevant search, search by category, autocomplete, suggest, typeahead
 Requires at least: 3.3
 Tested up to: 3.5
-Stable tag: 1.1.17
+Stable tag: 1.1.18
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,6 +38,16 @@ Sign up for a free account at [http://swiftype.com](http://swiftype.com)
 
 == Changelog ==
 
+= 1.1.18 =
+* Improved synchronization of posts with Swiftype
 
+= 1.1.17 =
+
+* Support for indexing custom post types
+* Improved synchronization of posts with Swiftype
+
+= 1.0 =
+
+Initial release.
 
 == Upgrade notice ==
