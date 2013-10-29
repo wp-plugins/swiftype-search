@@ -30,6 +30,7 @@
 		private $per_page = 0;
 		private $search_successful = false;
 		private $error = NULL;
+		private $results = NULL;
 
 		private $max_retries = 5;
 		private $retry_delay = 2;
@@ -48,13 +49,20 @@
 				add_filter( 'post_limits', array( $this, 'set_sql_limit' ) );
 				add_filter( 'the_posts', array( $this, 'get_search_result_posts' ) );
 
-				$this->api_key = get_option( 'swiftype_api_key' );
-				$this->engine_slug = get_option( 'swiftype_engine_slug' );
-				$this->engine_key = get_option( 'swiftype_engine_key' );
-
-				$this->client = new SwiftypeClient;
-				$this->client->set_api_key( $this->api_key );
+				$this->initialize_api_client();
 			}
+		}
+
+		/**
+		 * Initialize swiftype API client
+		 */
+		public function initialize_api_client() {
+			$this->api_key = get_option( 'swiftype_api_key' );
+			$this->engine_slug = get_option( 'swiftype_engine_slug' );
+			$this->engine_key = get_option( 'swiftype_engine_key' );
+
+			$this->client = new SwiftypeClient();
+			$this->client->set_api_key( $this->api_key );
 		}
 
 		/**
@@ -101,10 +109,7 @@
 					}
 				}
 
-				$this->api_key = get_option( 'swiftype_api_key' );
-				$this->api_authorized = get_option( 'swiftype_api_authorized' );
-				$this->client = new SwiftypeClient;
-				$this->client->set_api_key( $this->api_key );
+				$this->initialize_api_client();
 				$this->check_api_authorized();
 				if( ! $this->api_authorized )
 					return;
@@ -159,24 +164,25 @@
 				$params = apply_filters( 'swiftype_search_params', $params );
 
 				try {
-					$results = $this->client->search( $this->engine_slug, $this->document_type_slug, $query_string, $params );
+					$this->results = $this->client->search( $this->engine_slug, $this->document_type_slug, $query_string, $params );
 				} catch( SwiftypeError $e ) {
+					$this->results = NULL;
 					$this->search_successful = false;
 				}
 
-				if( ! isset( $results ) ) {
+				if( ! isset( $this->results ) ) {
 					$this->search_successful = false;
 					return;
 				}
 
 				$this->post_ids = array();
-				$records = $results['records']['posts'];
+				$records = $this->results['records']['posts'];
 
 				foreach( $records as $record ) {
 					$this->post_ids[] = $record['external_id'];
 				}
 
-				$result_info = $results['info']['posts'];
+				$result_info = $this->results['info']['posts'];
 				$this->per_page = $result_info['per_page'];
 
 				$this->total_result_count = $result_info['total_result_count'];
@@ -192,19 +198,15 @@
 	/**
 		* Check whether or not the Swiftype API client is authorized
 		*
-		* Retrieves search results from the Swiftype API based on the user-input text query.
-		* We retrieve 100 results during the initial
-		* request to Swiftype and cache all results, so pagination is done locally as well (i.e. requests for page 2, 3, etc.
-		* do not hit the Swiftype API either). Called from the pre_get_posts action.
-		*
 		* @return null
 		*/
-		private function check_api_authorized() {
+		public function check_api_authorized() {
 			if( ! is_admin() )
 				return;
 			if( $this->api_authorized )
 				return;
-
+			
+			// If we have the key, try to ask API client for authorization
 			if( $this->api_key && strlen( $this->api_key ) > 0 ) {
 				try {
 					$this->api_authorized = $this->client->authorized();
@@ -695,6 +697,20 @@
 		}
 
 	/**
+		* Return the raw Swiftype results array after a search is performed.
+		*/
+		public function results() {
+			return $this->results;
+		}
+
+	/**
+		* Return the total number of results after a search is performed.
+		*/
+		public function get_total_result_count() {
+			return $this->total_result_count;
+		}
+
+	/**
 		* Determines if a post should be indexed.
 		*/
 		private function should_index_post( $post ) {
@@ -710,5 +726,3 @@
 		}
 
 	}
-
-	$swiftype_plugin = new SwiftypePlugin();
