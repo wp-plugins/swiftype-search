@@ -35,8 +35,6 @@
 		private $max_retries = 5;
 		private $retry_delay = 2;
 
-		public function SwiftypePlugin() { $this->__construct(); }
-
 		public function __construct() {
 			add_action( 'admin_menu', array( $this, 'swiftype_menu' ) );
 			add_action( 'admin_init', array( $this, 'initialize_admin_screen' ) );
@@ -294,7 +292,7 @@
 
 
 	/**
-		* Get posts from the database in the order dicated by the Swiftype API
+		* Get posts from the database in the order dictated by the Swiftype API
 		*
 		* Apply the correct ordering to the posts retrieved in the main query, based on results from the Swiftype API.
 		* Called by the the_posts filter.
@@ -310,6 +308,7 @@
 			}
 			global $wp_query;
 			$wp_query->max_num_pages = $this->num_pages;
+			$wp_query->found_posts = $this->total_result_count;
 
 			$lookup_table = array();
 			foreach( $posts as $post ) {
@@ -318,7 +317,7 @@
 
 			$ordered_posts = array();
 			foreach( $this->post_ids as $pid ) {
-				if ( $lookup_table[ $pid ] ) {
+				if ( isset( $lookup_table[ $pid ] ) ) {
 					$ordered_posts[] = $lookup_table[ $pid ];
 				}
 			}
