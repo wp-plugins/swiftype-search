@@ -4,7 +4,7 @@ Donate link:
 Tags: search, better search, custom search, relevant search, search by category, autocomplete, suggest, typeahead
 Requires at least: 3.3
 Tested up to: 3.8
-Stable tag: 1.1.35
+Stable tag: 1.1.36
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,10 @@ You can install the plugin for each site with its own search engine, but we don'
 
 == Changelog ==
 
+= 1.1.36 =
+* WP-CLI commands. If you use [WP-CLI](http://wp-cli.org/), you can now use the command line to index your content much faster. Great for large sites. Type `wp swiftype` in your WordPress directory for details.
+* Add `swiftype_search_query_string` filter to make modifying the query easier. Thanks to Paul Morrison for the patch.
+
 = 1.1.35 =
 * Streamline script concatenation.
 
@@ -141,3 +145,51 @@ Initial release.
 
 = 1.1.26 =
 This fixes an important issue for many users that prevented synchronization of new posts and first time authentication.  Please upgrade immediately and resynchronize your posts.
+
+== WP-CLI Support ==
+
+Swiftype Search supports [WP-CLI](http://wp-cli.org/).
+
+To see the available commands type `wp swiftype` in your WordPress install directory.
+
+The CLI is particularly useful if you have a large number of posts (more than 10,000) because it can synchronize posts with Swiftype more quickly by controlling the indexing batch size. Also, the CLI provides an option to destructively reindex the contents of your WordPress site which will be faster if you have a large number of deleted posts or simply want to start fresh.
+
+To index your WordPress site with the CLI, make sure you have WP-CLI installed and configure the plugin with your API key and search engine. Then run:
+
+`wp swiftype sync`
+
+To index more content at once, increase the batch size:
+
+`wp swiftype sync --index-batch-size 100`
+
+In general, using a larger batch size will be faster. However, the size of the batch you can use is determined by how large your posts are on average.
+
+== Modifying search parameters ==
+
+The Swiftype Search plugin provides a filter called `swiftype_search_params` that allows you to modify the search parameters before they are sent to Swiftype.
+
+For example, to add a filter so only pages are returned by the search results, you can add the following to your functions.php file:
+
+    function swiftype_search_params_filter( $params ) {
+        $params['filters[posts][object_type]'] = array( 'page' );
+
+        return $params;
+    }
+
+    add_filter( 'swiftype_search_params', 'swiftype_search_params_filter', 8, 1 );
+
+For more details, check out our [WordPress customization tutorial](https://swiftype.com/documentation/tutorials/customizing_wordpress_search) and the Swiftype [Search API documentation](https://swiftype.com/documentation/searching).
+
+== Modifying the query string ==
+
+The Swiftype Search plugin provides a filter called `swiftype_search_query_string` that makes it easier to modify the query string before it is sent to Swiftype.
+
+For example, to add a term to every query string, you can add the following to your functions.php file:
+
+    function swiftype_search_query_filter( $query ) {
+        return $query . ' ThisWillAlwaysBeInEveryQuery';
+    }
+
+    add_filter( 'swiftype_search_query_string', 'swiftype_search_query_filter', 8, 1 );
+
+You can use this filter to pre-process queries before they are executed.
