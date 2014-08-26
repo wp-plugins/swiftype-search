@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 
 # Fail on all errors
-set +ex
+set -e
+
+/etc/init.d/mysql start
 
 export WP_TESTS_DIR=/tmp/wordpress-testing
 export WP_DIR=/tmp/wordpress
 
 SCRIPTS_DIR=`dirname $0`
-WP_VERSION="$1"
+#WP_VERSION="$1"
 
 # Prepare testing frameworks and test database
 bash $SCRIPTS_DIR/install-wp-tests.sh wordpress_test root '' $WP_VERSION
@@ -22,5 +24,9 @@ else
   TEST_CONFIG=tests/phpunit.xml
 fi
 
+phpenv local $PHP_VERSION
+php -v
+phpunit --version
+
 # Run tests
-exec phpunit -c $WP_DIR/wp-content/plugins/swiftype-search/$TEST_CONFIG --strict --log-junit tests/report.xml
+exec phpunit --verbose -c $WP_DIR/wp-content/plugins/swiftype-search/$TEST_CONFIG --strict --log-junit tests/report.xml
