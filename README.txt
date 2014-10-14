@@ -4,7 +4,7 @@ Donate link:
 Tags: search, better search, custom search, relevant search, search by category, autocomplete, suggest, typeahead
 Requires at least: 3.3
 Tested up to: 4.0
-Stable tag: 1.1.37
+Stable tag: 1.1.38
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -76,6 +76,9 @@ You can install the plugin for each site with its own search engine, but we don'
 2. The Swiftype search result controls dashboard.  Here you can customize any aspect of your results.  You can drag and drop to reoder search results, remove results you don't want to show up in the search, and even add results that don't show up automatically.
 
 == Changelog ==
+
+= 1.1.38 =
+* Add `swiftype_render_facets` theme function to support faceting on the search results page.
 
 = 1.1.37 =
 * Tested with WordPress 4.0.
@@ -196,3 +199,24 @@ For example, to add a term to every query string, you can add the following to y
     add_filter( 'swiftype_search_query_string', 'swiftype_search_query_filter', 8, 1 );
 
 You can use this filter to pre-process queries before they are executed.
+
+== Adding Faceted Search Results ==
+
+The Swiftype Search plugin provides the `swiftype_render_facets` theme function to allow you to easily add faceting to your search results page. To use it, follow these steps:
+
+1.  Add a `swiftype_search_params_filter` function to your theme's `functions.php` file that adds facet parameters to the search. 
+
+    The version below will facet on tags and category:
+
+        function swiftype_search_params_filter( $params ) {
+            $params['facets[posts]'] = array( 'tags', 'category' );
+            return $params;
+        }
+
+        add_filter( 'swiftype_search_params', 'swiftype_search_params_filter', 8, 1 );
+
+2.  Add a `swiftype_render_facets()` call to your `search.php` template. This is what actually renders the facets. You should place it where you want the facets to be rendered:
+
+        <?php swiftype_render_facets(); ?>
+
+3.  (Optional) Style the facets using CSS. You can target `div.st-facets` for your CSS rules to only affect the content inside the facets container.
