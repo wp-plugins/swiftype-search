@@ -4,7 +4,7 @@ Donate link:
 Tags: search, better search, custom search, relevant search, search by category, autocomplete, suggest, typeahead
 Requires at least: 3.3
 Tested up to: 4.1
-Stable tag: 1.1.41
+Stable tag: 1.1.42
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -76,6 +76,9 @@ You can install the plugin for each site with its own search engine, but we don'
 2. The Swiftype search result controls dashboard.  Here you can customize any aspect of your results.  You can drag and drop to reoder search results, remove results you don't want to show up in the search, and even add results that don't show up automatically.
 
 == Changelog ==
+
+= 1.1.42 =
+* Minor updates
 
 = 1.1.41 =
 * Made compatible with WordPress 4.1.
@@ -176,7 +179,7 @@ To index your WordPress site with the CLI, make sure you have WP-CLI installed a
 
 To index more content at once, increase the batch size:
 
-`wp swiftype sync --index-batch-size 100`
+`wp swiftype sync --index-batch-size=100`
 
 In general, using a larger batch size will be faster. However, the size of the batch you can use is determined by how large your posts are on average.
 
@@ -214,7 +217,7 @@ You can use this filter to pre-process queries before they are executed.
 
 The Swiftype Search plugin provides the `swiftype_render_facets` theme function to allow you to easily add faceting to your search results page. To use it, follow these steps:
 
-1.  Add a `swiftype_search_params_filter` function to your theme's `functions.php` file that adds facet parameters to the search. 
+1.  Add a `swiftype_search_params_filter` function to your theme's `functions.php` file that adds facet parameters to the search.
 
     The version below will facet on tags and category:
 
