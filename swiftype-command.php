@@ -73,6 +73,7 @@ class Swiftype_Command extends WP_CLI_Command {
 			WP_CLI::confirm( "Delete all documents and re-index?" );
 
 			$engine_slug = get_option( 'swiftype_engine_slug' );
+			WP_CLI::log("Deleting existing documents...");
 
 			try {
 				$swiftype_plugin->client()->delete_document_type( $engine_slug, 'posts' );
@@ -82,6 +83,15 @@ class Swiftype_Command extends WP_CLI_Command {
 				} else {
 					WP_CLI::log( $e );
 					WP_CLI::error( "Could not delete 'posts' DocumentType, aborting." );
+				}
+			}
+
+			while ( true ) {
+				try {
+					$swiftype_plugin->client()->find_document_type( $engine_slug, 'posts' );
+				} catch( SwiftypeError $e ) {
+					// DocumentType is gone now.
+					break;
 				}
 			}
 
@@ -111,11 +121,12 @@ class Swiftype_Command extends WP_CLI_Command {
 			$posts_deleted_in_batch = 0;
 			$delete_batch_size = $this->integer_argument( $assoc_args['delete-batch-size'], 100 );
 
-			do {
-				WP_CLI::log( "Deleting " . $delete_batch_size . " posts from offset " . $offset );
+	  do {
+		$end_count = $offset + $delete_batch_size;
+				WP_CLI::log( "Deleting trashed posts from " . $offset . " to " . $end_count );
 				$posts_deleted_in_batch = $swiftype_plugin->delete_batch_of_trashed_posts( $offset, $delete_batch_size );
 				$offset += $posts_deleted_in_batch;
-				WP_CLI::log( "successfully deleted " . $posts_deleted_in_batch . " posts" );
+				WP_CLI::log( "Successfully deleted " . $posts_deleted_in_batch . " trashed posts." );
 
 			} while ( $posts_deleted_in_batch != 0 );
 
